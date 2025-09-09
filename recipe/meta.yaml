@@ -1,41 +1,58 @@
 {% set name = "feedparser" %}
-{% set version = "6.0.8" %}
+{% set version = "6.0.11" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 5ce0410a05ab248c8c7cfca3a0ea2203968ee9ff4486067379af4827a59f9661
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: c9d0407b64c6f2a065d0ebb292c2b35c01050cc0dc33757461aaabdc4c4184d5
 
 build:
   number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vvv "
+  skip: true  # [py<36]
+  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vv
 
 requirements:
   host:
     - pip
     - python
+    - wheel
   run:
     - python
     - sgmllib3k
 
 test:
+  files:
+    - tests/test_smoke.py
   imports:
     - feedparser
+    - feedparser.api
+    - feedparser.datetimes
+    - feedparser.http
+    - feedparser.mixin
+    - feedparser.sanitizer
+    - feedparser.urls
+    - feedparser.util
+  requires:
+    - pip
+    - pytest
+  commands:
+    - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
+    - pytest tests/test_smoke.py -ra -vv
 
 about:
   home: https://github.com/kurtmckee/feedparser
-  license: OSI Approved
+  license: BSD-2-Clause
   license_family: Other
   license_file: LICENSE
-  summary: parse feeds in Python
+  summary: Universal feed parser, handles RSS 0.9x, RSS 1.0, RSS 2.0, CDF, Atom 0.3, and Atom 1.0 feeds
   description: |
     Feedparser is a Universal Feed Parser for Python. It is used to download
     and parse syndicated feeds.
-  doc_url: https://pythonhosted.org/feedparser/
-  doc_source_url: https://github.com/kurtmckee/feedparser/blob/develop/docs/index.rst
+  doc_url: https://pythonhosted.org/feedparser
   dev_url: https://github.com/kurtmckee/feedparser
 
 extra:
